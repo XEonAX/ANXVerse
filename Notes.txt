@@ -1,0 +1,31 @@
+This port is based on miui_STAR_21.8.18_c74cda046d_11.0.zip
+
+We have extracted the rom with payload-dumper-go.exe taken from https://github.com/ssut/payload-dumper-go
+Then we have used 7z to extract the system and vendor image files
+
+We will now start the process of decompiling MiuiCamera
+
+First we need to provide frameworks files for APKTool
+
+cp C:\Projects\roms\star\system\system\framework\framework-res.apk .\originals\MiuiFrameworks\framework-res.apk
+cp C:\Projects\roms\star\system\system\app\miui\miui.apk .\originals\MiuiFrameworks\miui.apk
+cp C:\Projects\roms\star\system\system\framework\framework-ext-res\framework-ext-res.apk .\originals\MiuiFrameworks\framework-ext-res.apk
+cp C:\Projects\roms\star\system\system\app\miuisystem\miuisystem.apk .\originals\MiuiFrameworks\miuisystem.apk
+
+Lets Import the FWs into APKTool
+
+java  -jar "C:\Projects\apktool\brut.apktool\apktool-cli\build\libs\apktool-cli-all.jar" if -p C:\Projects\ANXVerseTools\MiuiFrameworks .\originals\MiuiFrameworks\framework-res.apk
+java  -jar "C:\Projects\apktool\brut.apktool\apktool-cli\build\libs\apktool-cli-all.jar" if -p C:\Projects\ANXVerseTools\MiuiFrameworks .\originals\MiuiFrameworks\miui.apk
+java  -jar "C:\Projects\apktool\brut.apktool\apktool-cli\build\libs\apktool-cli-all.jar" if -p C:\Projects\ANXVerseTools\MiuiFrameworks .\originals\MiuiFrameworks\framework-ext-res.apk
+java  -jar "C:\Projects\apktool\brut.apktool\apktool-cli\build\libs\apktool-cli-all.jar" if -p C:\Projects\ANXVerseTools\MiuiFrameworks .\originals\MiuiFrameworks\miuisystem.apk
+
+We have finished importing the frameworks into APKTool
+
+Lets decompile MiuiCamera
+java  -jar "C:\Projects\apktool\brut.apktool\apktool-cli\build\libs\apktool-cli-all.jar" d -p C:\Projects\ANXVerseTools\MiuiFrameworks -f -b -o .\src\ANXCamera12\src .\originals\MiuiCamera.apk
+
+It seems we have decompiled without errors.
+This porting is going to have lot of trouble due to presence of obfuscation in the build
+**We made a wrong step above which has now been corrected. On Line 25 `.\src\ANXCamera12` --> `.\src\ANXCamera12\src`
+
+We  avoid gui git when we are dealing with lots of files. Here we want to commit 23173 files
