@@ -1,0 +1,8 @@
+[submodule "src/ANXCamera12"]
+	path = src/ANXCamera12
+	url = https://github.com/XEonAX/ANXCamera12.git
+	branch = master
+[submodule "src/ANXFramework12"]
+	path = src/ANXFramework12
+	url = https://github.com/XEonAX/ANXFramework12.git
+	branch = master
