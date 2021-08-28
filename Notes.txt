@@ -29,3 +29,42 @@ This porting is going to have lot of trouble due to presence of obfuscation in t
 **We made a wrong step above which has now been corrected. On Line 25 `.\src\ANXCamera12` --> `.\src\ANXCamera12\src`
 
 We  avoid gui git when we are dealing with lots of files. Here we want to commit 23173 files
+
+Lets try to recompile it once
+
+java  -jar "C:\Projects\apktool\brut.apktool\apktool-cli\build\libs\apktool-cli-all.jar" b -p C:\Projects\ANXVerseTools\MiuiFrameworks -o .\out\ANXCamera-Unsigned.apk .\src\ANXCamera12\src
+
+it finished compiling with no errors
+
+Lets sign and zipalign
+c:\Projects\ANXVerseTools\apksigner.bat sign --key C:\Projects\ANXVerseTools\testkey.pk8 --cert C:\Projects\ANXVerseTools\testkey.x509.pem  --in .\out\ANXCamera-Unsigned.apk --out .\out\ANXCamera-Unaligned.apk
+C:\Projects\ANXVerseTools\zipalign.exe -f 4  .\out\ANXCamera-Unaligned.apk .\out\ANXCamera.apk
+
+Lets try install the recompiled APK, its supposed to fail
+adb install -g .\out\ANXCamera.apk
+Performing Streamed Install
+adb: failed to install .\out\ANXCamera.apk: Failure [INSTALL_PARSE_FAILED_NO_CERTIFICATES: Failed collecting certificates for /data/app/vmdl1336887076.tmp/base.apk: Failed to collect certificates from /data/app/vmdl1336887076.tmp/base.apk: META-INF/TESTKEY.SF indicates /data/app/vmdl1336887076.tmp/base.apk is signed using APK Signature Scheme v2, but no such signature was found. Signature stripped?]
+hmm. I have no idea what that means
+
+Lets come back to previous issue of INSTALL_PARSE_FAILED_NO_CERTIFICATES
+We made 2 mistakes
+we did apksign first and then did a zipalign
+
+    If you use apksigner, zipalign must only be performed before the APK file has been signed. If you sign your APK using apksigner and make further changes to the APK, its signature is invalidated.
+    If you use jarsigner, zipalign must only be performed after the APK file has been signed.
+
+My old script used to use jarsigner. I followed the same order here which is wrong.
+
+lets correct the script above
+
+First rename the output of APKTool
+java  -jar "C:\Projects\apktool\brut.apktool\apktool-cli\build\libs\apktool-cli-all.jar" b -p C:\Projects\ANXVerseTools\MiuiFrameworks -o .\out\ANXCamera-Unaligned.apk .\src\ANXCamera12\src
+
+Lets zipalign then apksign
+C:\Projects\ANXVerseTools\zipalign.exe -p -f 4  .\out\ANXCamera-Unaligned.apk .\out\ANXCamera-Unsigned.apk
+C:\Projects\ANXVerseTools\apksigner.bat sign -v --key C:\Projects\ANXVerseTools\testkey.pk8 --cert C:\Projects\ANXVerseTools\testkey.x509.pem  --in .\out\ANXCamera-Unsigned.apk --out .\out\ANXCamera.apk
+
+Lets try installing it again
+adb install -g .\out\ANXCamera.apk
+
+Booom! Success! 0.1
