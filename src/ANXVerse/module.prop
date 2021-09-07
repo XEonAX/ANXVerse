@@ -1,7 +1,7 @@
 id=ANXVerse
-name=ANXVerse Magisk Module
-version=v1
-versionCode=1
+name=ANXVerse (Next-Gen ANXCamera)
+version=200.ImpishAuthorizedCub
+versionCode=200
 author=AEonAX
-description=Run MIUI on AOSP
+description=Run MiuiCamera on AOSP
 support=https://t.me/ANXMiuiCameraChat
