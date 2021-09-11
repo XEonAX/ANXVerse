@@ -118,3 +118,8 @@ fin!
 
 Lets Decompile to Java
 call "C:\Projects\ANXVerseTools\jadx\bin\jadx.bat" -d .\src\ANXCamera12\java -r .\out\ANXCamera.apk --show-bad-code
+
+<--some forgotten hocus pocus here-->
+
+Since classes1.dex already refers to 65535 methods, we cannot edit the code to refer to more methods.
+we move androidx to classes4
