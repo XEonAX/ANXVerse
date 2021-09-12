@@ -92,3 +92,59 @@ Success
 Booom! Success! 0.1
 
 It installed. But doesnt run. Thats weird it needs Miui, Star Port didn't need miui.
+
+Lets decompile our APK to java instead of original, since we will be modifying our APK further.
+First steps let prepare the Magisk module
+
+We need to start working on Magisk Module then
+So that we can install it to system/priv-app
+
+Copy APK to Magisk Module Directoy `ANXVerse`
+xcopy /s /y .\out\ANXCamera.apk .\src\ANXVerse\system\priv-app\ANXCamera\
+
+Copy some other files, which help us access priveleged API, as well as set permissions
+
+
+del .\out\ANXVerse.zip
+del .\out\ANXVerse_*.zip
+
+"G:\Program Files\7-Zip\7z.exe" a -tzip .\out\ANXVerse.zip .\src\ANXVerse\*
+adb push .\out\ANXVerse.zip  /sdcard/zips
+
+lets try installing this Magisk Module
+Atleast the Phone booted
+Let the logcat calm down a little
+I need to grant permissions manually
+
+Reading the Logcat generated, we see lot of errors.
+Lets start with errors which we are familliar with.
+for e.g. java.lang.UnsatisfiedLinkError: dlopen failed: library "libcamera_algoup_jni.xiaomi.so" not found
+Easiest one to fix. we just need to provide it missing libs
+
+We will try to prepare teh dependency graph of all the system and vendor libs
+
+To install a magisk module again, we need to increase the version everytime. I just scripted it out
+
+lets wait for logcat to calm
+
+we did a mistake lib64 folder should be inside system folder lets move it inside. re-version, re-zip, re-install
+New error Error :dlopen failed: library "/system/lib64/libmicampostproc_client.so" not found
+This indicates progress
+
+I am currently directly adding lib files via root file explorer
+so that I dont need to deploy enter module and restart the Phone
+
+I dont see any more dlopen failed errors
+I will stop for today
+
+Its a surprise that I can launch the camera in Video mode
+
+fin!
+
+Lets Decompile to Java
+call "..\ANXVerseTools\jadx\bin\jadx.bat" -d .\src\ANXCamera12\java -r .\out\ANXCamera.apk --show-bad-code
+
+<--some forgotten hocus pocus here-->
+
+Since classes1.dex already refers to 65535 methods, we cannot edit the code to refer to more methods.
+we move androidx to classes4
