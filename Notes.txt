@@ -7,10 +7,10 @@ We will now start the process of decompiling MiuiCamera
 
 First we need to provide frameworks files for APKTool
 
-cp C:\Projects\roms\star\system\system\framework\framework-res.apk .\originals\MiuiFrameworks\framework-res.apk
-cp C:\Projects\roms\star\system\system\app\miui\miui.apk .\originals\MiuiFrameworks\miui.apk
-cp C:\Projects\roms\star\system\system\framework\framework-ext-res\framework-ext-res.apk .\originals\MiuiFrameworks\framework-ext-res.apk
-cp C:\Projects\roms\star\system\system\app\miuisystem\miuisystem.apk .\originals\MiuiFrameworks\miuisystem.apk
+cp C:\Projects\roms\alioth21.8.18\system\system\framework\framework-res.apk .\originals\MiuiFrameworks\framework-res.apk
+cp C:\Projects\roms\alioth21.8.18\system\system\app\miui\miui.apk .\originals\MiuiFrameworks\miui.apk
+cp C:\Projects\roms\alioth21.8.18\system\system\framework\framework-ext-res\framework-ext-res.apk .\originals\MiuiFrameworks\framework-ext-res.apk
+cp C:\Projects\roms\alioth21.8.18\system\system\app\miuisystem\miuisystem.apk .\originals\MiuiFrameworks\miuisystem.apk
 
 Lets Import the FWs into APKTool
 
@@ -21,105 +21,30 @@ java  -jar "..\ANXVerseTools\apktool-cli-all.jar" if -p ..\ANXVerseTools\MiuiFra
 
 We have finished importing the frameworks into APKTool
 
+Lets copy MiuiCamera camera APK into originals
+cp C:\Projects\roms\alioth21.8.18\system\system\priv-app\MiuiCamera\MiuiCamera.apk .\originals\MiuiCamera.apk
+
+
 Lets decompile MiuiCamera
 java  -jar "..\ANXVerseTools\apktool-cli-all.jar" d -p ..\ANXVerseTools\MiuiFrameworks -f -b -o .\src\ANXCamera12\src .\originals\MiuiCamera.apk
 
+Lets also decompile it to java as well
+call "..\ANXVerseTools\jadx\bin\jadx.bat" -d .\src\ANXCamera12\java -r .\originals\MiuiCamera.apk --show-bad-code
+
 It seems we have decompiled without errors.
 This porting is going to have lot of trouble due to presence of obfuscation in the build
-**We made a wrong step above which has now been corrected. On Line 25 `.\src\ANXCamera12` --> `.\src\ANXCamera12\src`
-
 We  avoid gui git when we are dealing with lots of files. Here we want to commit 23173 files
 
-Lets try to recompile it once
-
-java  -jar "..\ANXVerseTools\apktool-cli-all.jar" b -p ..\ANXVerseTools\MiuiFrameworks -o .\out\ANXCamera-Unsigned.apk .\src\ANXCamera12\src
-
-it finished compiling with no errors
-
-Lets sign and zipalign
-..\ANXVerseTools\apksigner.bat sign --key ..\ANXVerseTools\testkey.pk8 --cert ..\ANXVerseTools\testkey.x509.pem  --in .\out\ANXCamera-Unsigned.apk --out .\out\ANXCamera-Unaligned.apk
-..\ANXVerseTools\zipalign.exe -f 4  .\out\ANXCamera-Unaligned.apk .\out\ANXCamera.apk
-
-Lets try install the recompiled APK, its supposed to fail
-adb install -g .\out\ANXCamera.apk
-Performing Streamed Install
-adb: failed to install .\out\ANXCamera.apk: Failure [INSTALL_PARSE_FAILED_NO_CERTIFICATES: Failed collecting certificates for /data/app/vmdl1336887076.tmp/base.apk: Failed to collect certificates from /data/app/vmdl1336887076.tmp/base.apk: META-INF/TESTKEY.SF indicates /data/app/vmdl1336887076.tmp/base.apk is signed using APK Signature Scheme v2, but no such signature was found. Signature stripped?]
-hmm. I have no idea what that means
-
-Lets come back to previous issue of INSTALL_PARSE_FAILED_NO_CERTIFICATES
-We made 2 mistakes
-we did apksign first and then did a zipalign
-
-    If you use apksigner, zipalign must only be performed before the APK file has been signed. If you sign your APK using apksigner and make further changes to the APK, its signature is invalidated.
-    If you use jarsigner, zipalign must only be performed after the APK file has been signed.
-
-My old script used to use jarsigner. I followed the same order here which is wrong.
-
-lets correct the script above
-
-First rename the output of APKTool
+Lets compile 
 java  -jar "..\ANXVerseTools\apktool-cli-all.jar" b -p ..\ANXVerseTools\MiuiFrameworks -o .\out\ANXCamera-Unaligned.apk .\src\ANXCamera12\src
 
 Lets zipalign then apksign
 ..\ANXVerseTools\zipalign.exe -p -f 4  .\out\ANXCamera-Unaligned.apk .\out\ANXCamera-Unsigned.apk
 ..\ANXVerseTools\apksigner.bat sign -v --key ..\ANXVerseTools\testkey.pk8 --cert ..\ANXVerseTools\testkey.x509.pem  --in .\out\ANXCamera-Unsigned.apk --out .\out\ANXCamera.apk
 
-Lets try installing it again
-adb install -g .\out\ANXCamera.apk
-
-Booom! Success! 0.1
-
-It installed. But doesnt run. Since it uses priveleged API which normally installed apps don't have access to. its gonna fail.
-
-We need to start working on Magisk Module then
-So that we can install it to system/priv-app
-
-Copy APK to Magisk Module Directoy `ANXVerse`
-xcopy /s /y .\out\ANXCamera.apk .\src\ANXVerse\system\priv-app\ANXCamera\
-
-Copy some other files, which help us access priveleged API, as well as set permissions
-
-
-del .\out\ANXVerse.zip
-del .\out\ANXVerse_*.zip
-
-"G:\Program Files\7-Zip\7z.exe" a -tzip .\out\ANXVerse.zip .\src\ANXVerse\*
-adb push .\out\ANXVerse.zip  /sdcard/zips
-
-lets try installing this Magisk Module
-Atleast the Phone booted
-Let the logcat calm down a little
-I need to grant permissions manually
-
-Reading the Logcat generated, we see lot of errors.
-Lets start with errors which we are familliar with.
-for e.g. java.lang.UnsatisfiedLinkError: dlopen failed: library "libcamera_algoup_jni.xiaomi.so" not found
-Easiest one to fix. we just need to provide it missing libs
-
-We will try to prepare teh dependency graph of all the system and vendor libs
-
-To install a magisk module again, we need to increase the version everytime. I just scripted it out
-
-lets wait for logcat to calm
-
-we did a mistake lib64 folder should be inside system folder lets move it inside. re-version, re-zip, re-install
-New error Error :dlopen failed: library "/system/lib64/libmicampostproc_client.so" not found
-This indicates progress
-
-I am currently directly adding lib files via root file explorer
-so that I dont need to deploy enter module and restart the Phone
-
-I dont see any more dlopen failed errors
-I will stop for today
-
-Its a surprise that I can launch the camera in Video mode
-
-fin!
-
 Lets Decompile to Java
 call "..\ANXVerseTools\jadx\bin\jadx.bat" -d .\src\ANXCamera12\java -r .\out\ANXCamera.apk --show-bad-code
 
-<--some forgotten hocus pocus here-->
+Since classes1.dex already refers to 65534 methods, we cannot edit the code to refer to more methods.
+So we move androidx to classes4
 
-Since classes1.dex already refers to 65535 methods, we cannot edit the code to refer to more methods.
-we move androidx to classes4
