@@ -10,6 +10,6 @@ for /f "delims== tokens=1,2" %%G in (VERSION) do set anx%%G=%%H
 echo %anxversion%
 
 "G:\Program Files\7-Zip\7z.exe" a -tzip .\out\ANXVerse.zip .\src\ANXVerse\*
-adb push .\out\ANXVerse.zip  /sdcard/zips
+adb push .\out\ANXVerse.zip  /sdcard/zips/
 
 copy .\out\ANXVerse.zip /B .\out\ANXCamera_%anxversion%.zip
