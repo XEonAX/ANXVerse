@@ -2,6 +2,8 @@ xcopy /s /y .\out\ANXCamera.apk .\src\ANXVerse\system\priv-app\ANXCamera\
 xcopy /s /y .\src\ANXCamera12\frida\ANXCamera.json .\src\ANXVerse\system\priv-app\ANXCamera\lib\arm64\libanx.config.so
 xcopy /s /y .\src\ANXCamera12\frida\anx.js .\src\ANXVerse\system\etc\ANXCamera\anx.js
 
+xcopy /s /y .\out\anxui.apk .\src\ANXVerse\system\app\anxui\anxui.apk
+
 del .\out\ANXVerse.zip
 del .\out\ANXVerse_*.zip
 del .\out\ANXCamera_*.zip

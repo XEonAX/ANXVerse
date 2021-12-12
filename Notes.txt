@@ -62,3 +62,24 @@ java  -jar "..\ANXVerseTools\apktool-cli-all.jar" b -p ..\ANXVerseTools\MiuiFram
 Lets zipalign then apksign
 ..\ANXVerseTools\zipalign.exe -p -f 4  .\out\anxsystem-Unaligned.apk .\out\anxsystem-Unsigned.apk
 ..\ANXVerseTools\apksigner.bat sign -v --key ..\ANXVerseTools\testkey.pk8 --cert ..\ANXVerseTools\testkey.x509.pem  --in .\out\anxsystem-Unsigned.apk --out .\out\anxsystem.apk
+
+
+
+
+Lets decompile miui.apk
+java  -jar "..\ANXVerseTools\apktool-cli-all.jar" d -p ..\ANXVerseTools\MiuiFrameworks -f -b -o .\src\ANXFramework12\anxui\src .\originals\MiuiFrameworks\miui.apk
+
+Lets Decompile to Java
+call "..\ANXVerseTools\jadx\bin\jadx.bat" -d .\src\ANXFramework12\anxui\java -r .\originals\MiuiFrameworks\miui.apk --show-bad-code
+
+lets compile to apk
+
+Lets compile 
+java  -jar "..\ANXVerseTools\apktool-cli-all.jar" b -p ..\ANXVerseTools\MiuiFrameworks -o .\out\anxui-Unaligned.apk .\src\ANXFramework12\anxui\src
+
+Lets zipalign then apksign
+..\ANXVerseTools\zipalign.exe -p -f 4  .\out\anxui-Unaligned.apk .\out\anxui-Unsigned.apk
+..\ANXVerseTools\apksigner.bat sign -v --key ..\ANXVerseTools\testkey.pk8 --cert ..\ANXVerseTools\testkey.x509.pem  --in .\out\anxui-Unsigned.apk --out .\out\anxui.apk
+
+
+
