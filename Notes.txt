@@ -1,0 +1,51 @@
+This port is based on miui_VAYUGlobal_V12.5.7.0.RJUMIXM_9847c652ee_11.0
+
+We have extracted the rom with brotli and sdat2img
+Then we have used 7z to extract the system and vendor image files
+
+We will now start the process of decompiling MiuiCamera
+
+First we need to provide frameworks files for APKTool
+
+cp C:\Projects\roms\vayu12.5.7.0\system\system\framework\framework-res.apk .\originals\MiuiFrameworks\framework-res.apk
+cp C:\Projects\roms\vayu12.5.7.0\system\system\app\miui\miui.apk .\originals\MiuiFrameworks\miui.apk
+cp C:\Projects\roms\vayu12.5.7.0\system\system\framework\framework-ext-res\framework-ext-res.apk .\originals\MiuiFrameworks\framework-ext-res.apk
+cp C:\Projects\roms\vayu12.5.7.0\system\system\app\miuisystem\miuisystem.apk .\originals\MiuiFrameworks\miuisystem.apk
+
+
+Lets Import the FWs into APKTool
+
+java  -jar "..\ANXVerseTools\apktool-cli-all.jar" if -p ..\ANXVerseTools\MiuiFrameworks .\originals\MiuiFrameworks\framework-res.apk
+java  -jar "..\ANXVerseTools\apktool-cli-all.jar" if -p ..\ANXVerseTools\MiuiFrameworks .\originals\MiuiFrameworks\miui.apk
+java  -jar "..\ANXVerseTools\apktool-cli-all.jar" if -p ..\ANXVerseTools\MiuiFrameworks .\originals\MiuiFrameworks\framework-ext-res.apk
+java  -jar "..\ANXVerseTools\apktool-cli-all.jar" if -p ..\ANXVerseTools\MiuiFrameworks .\originals\MiuiFrameworks\miuisystem.apk
+
+We have finished importing the frameworks into APKTool
+
+Lets copy MiuiCamera camera APK into originals
+cp C:\Projects\roms\vayu12.5.7.0\system\system\priv-app\MiuiCamera\MiuiCamera.apk .\originals\MiuiCamera.apk
+
+
+Lets decompile MiuiCamera
+java  -jar "..\ANXVerseTools\apktool-cli-all.jar" d -p ..\ANXVerseTools\MiuiFrameworks -f -b -o .\src\ANXCamera12\src .\originals\MiuiCamera.apk
+
+Lets also decompile it to java as well
+call "..\ANXVerseTools\jadx\bin\jadx.bat" -d .\src\ANXCamera12\java -r .\originals\MiuiCamera.apk --show-bad-code
+
+It seems we have decompiled without errors.
+This porting is going to have lot of trouble due to presence of obfuscation in the build
+We  avoid gui git when we are dealing with lots of files. Here we want to commit 23173 files
+
+Lets compile 
+java  -jar "..\ANXVerseTools\apktool-cli-all.jar" b -p ..\ANXVerseTools\MiuiFrameworks -o .\out\ANXCamera-Unaligned.apk .\src\ANXCamera12\src
+
+Lets zipalign then apksign
+..\ANXVerseTools\zipalign.exe -p -f 4  .\out\ANXCamera-Unaligned.apk .\out\ANXCamera-Unsigned.apk
+..\ANXVerseTools\apksigner.bat sign -v --key ..\ANXVerseTools\testkey.pk8 --cert ..\ANXVerseTools\testkey.x509.pem  --in .\out\ANXCamera-Unsigned.apk --out .\out\ANXCamera.apk
+
+Lets Decompile to Java
+call "..\ANXVerseTools\jadx\bin\jadx.bat" -d .\src\ANXCamera12\java -r .\out\ANXCamera.apk --show-bad-code
+
+Since classes1.dex already refers to 65534 methods, we cannot edit the code to refer to more methods.
+So we move androidx to classes4
+
