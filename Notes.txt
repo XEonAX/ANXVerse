@@ -45,3 +45,20 @@ Lets zipalign then apksign
 
 Lets Decompile to Java
 call "..\ANXVerseTools\jadx\bin\jadx.bat" -d .\src\ANXCamera12\java -r .\out\ANXCamera.apk --show-bad-code
+
+
+
+Lets decompile miuisystem.apk
+java  -jar "..\ANXVerseTools\apktool-cli-all.jar" d -p ..\ANXVerseTools\MiuiFrameworks -f -b -o .\src\ANXFramework12\anxsystem\src .\originals\MiuiFrameworks\miuisystem.apk
+
+Lets Decompile to Java
+call "..\ANXVerseTools\jadx\bin\jadx.bat" -d .\src\ANXFramework12\anxsystem\java -r .\originals\MiuiFrameworks\miuisystem.apk --show-bad-code
+
+lets compile to apk
+
+Lets compile 
+java  -jar "..\ANXVerseTools\apktool-cli-all.jar" b -p ..\ANXVerseTools\MiuiFrameworks -o .\out\anxsystem-Unaligned.apk .\src\ANXFramework12\anxsystem\src
+
+Lets zipalign then apksign
+..\ANXVerseTools\zipalign.exe -p -f 4  .\out\anxsystem-Unaligned.apk .\out\anxsystem-Unsigned.apk
+..\ANXVerseTools\apksigner.bat sign -v --key ..\ANXVerseTools\testkey.pk8 --cert ..\ANXVerseTools\testkey.x509.pem  --in .\out\anxsystem-Unsigned.apk --out .\out\anxsystem.apk
