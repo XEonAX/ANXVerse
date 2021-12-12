@@ -45,7 +45,3 @@ Lets zipalign then apksign
 
 Lets Decompile to Java
 call "..\ANXVerseTools\jadx\bin\jadx.bat" -d .\src\ANXCamera12\java -r .\out\ANXCamera.apk --show-bad-code
-
-Since classes1.dex already refers to 65534 methods, we cannot edit the code to refer to more methods.
-So we move androidx to classes4
-
